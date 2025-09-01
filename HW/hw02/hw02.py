@@ -103,7 +103,16 @@ def count_dollars(total):
     True
     """
     "*** YOUR CODE HERE ***"
-    
+    def helper(amount, lar_bill):
+        if amount == 0:
+            return 1
+        elif not lar_bill or amount  < 0:
+            return 0
+        else:
+            with_lar_bill = helper(amount - lar_bill, lar_bill)
+            without_lar_bill = helper(amount, next_smaller_dollar(lar_bill) if lar_bill != 1 else None)
+            return with_lar_bill + without_lar_bill
+    return helper(total, 100)
 
 def shuffle(s):
     """Return a shuffled list that interleaves the two halves of s.
@@ -120,7 +129,10 @@ def shuffle(s):
     """
     assert len(s) % 2 == 0, 'len(seq) must be even'
     "*** YOUR CODE HERE ***"
-
+    if not s:
+        return []
+    middle_index = len(s) // 2 
+    return [s[0], s[middle_index]] + shuffle(list(s[1:middle_index]) + list(s[middle_index + 1:]))
 
 def merge(s, t):
     """Merges two sorted lists.
@@ -146,4 +158,11 @@ def merge(s, t):
     True
     """
     "*** YOUR CODE HERE ***"
-
+    if not s:
+        return t
+    if not t:
+        return s
+    if s[0] < t[0]:
+        return [s[0]] + merge(s[1:], t)
+    else:
+        return [t[0]] + merge(s, t[1:])
