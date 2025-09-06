@@ -1,0 +1,23 @@
+What is encoding? - a mapping of text between human-readable characters and numeric codes(binary)
+
+ASCII(American Standerd Code for Information Interchange)
+- Oldest widely used encoding
+- 128 characters -> 7 bit(align to 8 bit)
+- limited to English content
+
+GBK(Chinese National Standerd Extension)
+- Covers simplified and traditional Chinese characters
+- Backward compatible with ASCII
+- Popular in mainland China before Unicode became dominant
+
+Unicode
+- ** Not a encoding itself **
+- a table of mappings
+
+UTF-32
+- Stores each Unicode code point directly in 4 bytes
+- Simple but wasteful
+
+UTF-8
+-Variable-length(1 -> 4 bytes)
+-Today's default, most universal encoding 
