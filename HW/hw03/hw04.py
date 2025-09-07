@@ -133,9 +133,13 @@ def balanced(m):
     True
     """
     "*** YOUR CODE HERE ***"
-    if not ((balanced(left(m))and is_arm(left(m))) or (balanced(right(m))and is_arm(right(m)))):
-        return False
-    return total_mass(left(m)) * length(left(m)) == total_mass(right(m)) * length(right(m))
+    if is_mobile(end(left(m))):
+        if not balanced(end(left(m))):
+            return False
+    if is_mobile(end(right(m))):
+        if not balanced(end(right(m))):
+            return False
+    return total_mass(end(left(m))) * length(left(m)) == total_mass(end(right(m))) * length(right(m))
 
 HW_SOURCE_FILE=__file__
 
@@ -150,7 +154,9 @@ def max_path_sum(t):
     17
     """
     "*** YOUR CODE HERE ***"
-
+    if is_leaf(t):
+        return label(t)
+    return label(t) + max([max_path_sum(branch) for branch in branches(t)])
 
 
 # Tree Data Abstraction
