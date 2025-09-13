@@ -152,7 +152,16 @@ def autocorrect(typed_word, word_list, diff_function, limit):
     # BEGIN PROBLEM 5
     "*** YOUR CODE HERE ***"
     # END PROBLEM 5
-
+    ld, ld_word = limit + 1, typed_word
+    for word in word_list:
+        if word == typed_word:
+            return word
+        d = diff_function(typed_word, word, limit)
+        if d <= limit and d < ld:
+            ld, ld_word = d, word
+    return ld_word
+        
+    
 
 def feline_fixes(typed, source, limit):
     """A diff function for autocorrect that determines how many letters
@@ -177,9 +186,14 @@ def feline_fixes(typed, source, limit):
     5
     """
     # BEGIN PROBLEM 6
-    assert False, 'Remove this line'
     # END PROBLEM 6
-
+    def keep_track(typed, source, limit, diff):
+        if not typed or not source:
+            return abs(len(typed) - len(source))
+        if diff > limit:
+            return diff
+        return (1 if typed[0] != source[0] else 0) + keep_track(typed[1:], source[1:], limit, diff + 1 if typed[0] != source[0] else diff)
+    return keep_track(typed, source, limit, 0)
 
 ############
 # Phase 2B #
@@ -201,23 +215,44 @@ def minimum_mewtations(typed, source, limit):
     >>> minimum_mewtations("ckiteus", "kittens", big_limit) # ckiteus -> kiteus -> kitteus -> kittens
     3
     """
-    assert False, 'Remove this line'
-    if ___________: # Base cases should go here, you may add more base cases as needed.
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-    # Recursive cases should go below here
-    if ___________: # Feel free to remove or add additional cases
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
-    else:
-        add = ... # Fill in these lines
-        remove = ...
-        substitute = ...
-        # BEGIN
-        "*** YOUR CODE HERE ***"
-        # END
+    memo = {}
+
+    def helper(i, j, remaining):
+        # If we've already exceeded the limit along this path, cap it.
+        if remaining < 0:
+            return limit + 1
+
+        # Prune: even the minimal necessary number of edits (length gap)
+        # already exceeds what we can spend.
+        if abs((len(typed) - i) - (len(source) - j)) > remaining:
+            return limit + 1
+
+        # End cases: one (or both) strings consumed
+        if i == len(typed) or j == len(source):
+            # Need to insert/delete the remainder of the other string
+            return (len(typed) - i) + (len(source) - j)
+
+        key = (i, j, remaining)
+        if key in memo:
+            return memo[key]
+
+        if typed[i] == source[j]:
+            # No cost if current characters match
+            ans = helper(i + 1, j + 1, remaining)
+        else:
+            # Try: insert (match source[j] by inserting), delete, substitute
+            insert_cost     = 1 + helper(i,     j + 1, remaining - 1)
+            delete_cost     = 1 + helper(i + 1, j,     remaining - 1)
+            substitute_cost = 1 + helper(i + 1, j + 1, remaining - 1)
+            ans = min(insert_cost, delete_cost, substitute_cost)
+
+        # Never return more than limit+1 (signals "over the limit")
+        memo[key] = min(ans, limit + 1)
+        return memo[key]
+
+    return helper(0, 0, limit)
+
+
 
 
 def final_diff(typed, source, limit):
@@ -259,7 +294,17 @@ def report_progress(typed, source, user_id, upload):
     # BEGIN PROBLEM 8
     "*** YOUR CODE HERE ***"
     # END PROBLEM 8
-
+    if not source:
+        upload({'id':user_id, 'progress':1.0})  
+        return 1.0
+    total, cnt = len(source), 0
+    for i in range(len(typed)):
+        if typed[i] == source[i]:
+            cnt += 1
+        else:
+            break
+    upload({'id':user_id, 'progress':cnt / total})
+    return cnt / total
 
 def time_per_word(words, timestamps_per_player):
     """Given timing data, return a match data abstraction, which contains a
@@ -281,7 +326,11 @@ def time_per_word(words, timestamps_per_player):
     # BEGIN PROBLEM 9
     "*** YOUR CODE HERE ***"
     # END PROBLEM 9
-
+    time = []
+    for player in timestamps_per_player:
+        time.append([player[i + 1] - player[i] for i in range(len(player) - 1)])
+    return match(words, time)
+            
 
 def fastest_words(match):
     """Return a list of lists of which words each player typed fastest.
@@ -303,7 +352,18 @@ def fastest_words(match):
     # BEGIN PROBLEM 10
     "*** YOUR CODE HERE ***"
     # END PROBLEM 10
+    times = get_all_times(match)
+    words = get_all_words(match)
 
+    f = [[] for __ in player_indices]
+    for k in word_indices:
+        min_time = min(times[i][k] for i in player_indices)
+        for i in player_indices:
+            if times[i][k] == min_time:
+                f[i].append(words[k])
+                break
+    return f
+        
 
 def match(words, times):
     """A data abstraction containing all words typed and their times.
